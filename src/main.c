@@ -93,11 +93,6 @@ int main(int argc, char *argv[])
     Debug("Display mode:%d\r\n", epd_mode);
     Dev_Info = EPD_IT8951_Init(VCOM);
 
-#if(Enhance)
-    Debug("Attention! Enhanced driving ability, only used when the screen is blurred\r\n");
-    Enhance_Driving_Capability();
-#endif
-
     //get some important info from Dev_Info structure
     Panel_Width = Dev_Info.Panel_W;
     Panel_Height = Dev_Info.Panel_H;
@@ -128,33 +123,18 @@ int main(int argc, char *argv[])
 
 	EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, INIT_Mode);
 
-#if(USE_Factory_Test)
-	if(epd_mode == 3) 	// Color Test
-		Color_Test(Dev_Info, Init_Target_Memory_Addr);
-    else				// Normal Test
-		Factory_Test_Only(Dev_Info, Init_Target_Memory_Addr);
-#endif
 
-
-#if(USE_Normal_Demo)
     //Show 16 grayscale
     EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, GC16_Mode);
 
     //Show a bmp file
     //1bp use A2 mode by default, before used it, refresh the screen with WHITE
-    //Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_1);
-    //Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_2);
+    //	Retain the image
     Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_4);
-    EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, GC16_Mode);
-    
-    //We recommended refresh the panel to white color before storing in the warehouse.
-    EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, INIT_Mode);
 
-    //EPD_IT8951_Standby();
-    EPD_IT8951_Sleep();
 
     //In case RPI is transmitting image in no hold mode, which requires at most 10s
-    DEV_Delay_ms(5000);
+    //DEV_Delay_ms(5000);
 
     DEV_Module_Exit();
     return 0;
