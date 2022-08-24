@@ -72,19 +72,24 @@ int main(int argc, char *argv[])
         Debug("Example: sudo ./epd -2.51\r\n");
         exit(1);
     }
-	if (argc != 3){
+
+    /*
+    if (argc != 3){
 		Debug("Please input e-Paper display mode!\r\n");
 		Debug("Example: sudo ./epd -2.51 0 or sudo ./epd -2.51 1\r\n");
 		Debug("Now, 10.3 inch glass panle is mode1, else is mode0\r\n");
 		Debug("If you don't know what to type in just type 0 \r\n");
 		exit(1);
     }
+    */
 
     //Init the BCM2835 Device
     if(DEV_Module_Init()!=0){
         return -1;
     }
 
+    char* Imagepath = argv[3];
+    printf("The Image picked up %s\n", Imagepath);
     double temp;
     sscanf(argv[1],"%lf",&temp);
     VCOM = (UWORD)(fabs(temp)*1000);
@@ -125,7 +130,6 @@ int main(int argc, char *argv[])
         A2_Mode = 6;
     }
     Debug("A2 Mode:%d\r\n", A2_Mode);
-
 	EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, INIT_Mode);
 
 #if(USE_Factory_Test)
@@ -144,17 +148,18 @@ int main(int argc, char *argv[])
     //1bp use A2 mode by default, before used it, refresh the screen with WHITE
     //Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_1);
     //Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_2);
-    Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_4);
+    Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_4, Imagepath);
     EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, GC16_Mode);
+#endif
     
     //We recommended refresh the panel to white color before storing in the warehouse.
-    EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, INIT_Mode);
+    //EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, INIT_Mode);
 
     //EPD_IT8951_Standby();
-    EPD_IT8951_Sleep();
+    //EPD_IT8951_Sleep();
 
     //In case RPI is transmitting image in no hold mode, which requires at most 10s
-    DEV_Delay_ms(5000);
+    //DEV_Delay_ms(5000);
 
     DEV_Module_Exit();
     return 0;

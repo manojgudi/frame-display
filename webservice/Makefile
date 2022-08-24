@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-ULFIUS_REPO=/home/johnathon/standalone_software/ulfius/
+ULFIUS_REPO=$(ULFIUS_PATH)
 CC=gcc
 ULFIUS_LOCATION=$(ULFIUS_REPO)/src
 ULFIUS_INCLUDE=$(ULFIUS_REPO)/include

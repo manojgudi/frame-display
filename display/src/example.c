@@ -54,7 +54,7 @@ parameter:
     Init_Target_Memory_Addr: Memory address of IT8951 target memory address
     BitsPerPixel: Bits Per Pixel, 2^BitsPerPixel = grayscale
 ******************************************************************************/
-UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Target_Memory_Addr, UBYTE BitsPerPixel){
+UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Target_Memory_Addr, UBYTE BitsPerPixel, char* Imagepath){
     UWORD WIDTH;
     if(Four_Byte_Align == true){
         WIDTH  = Panel_Width - (Panel_Width % 32);
@@ -77,9 +77,11 @@ UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Ta
     Paint_SetBitsPerPixel(BitsPerPixel);
     Paint_Clear(WHITE);
 
-    char Path[30];
-    sprintf(Path,"./pic/%dx%d_0.bmp", WIDTH, HEIGHT);
+    //char Path[30];
+    //sprintf(Path,"./pic/%dx%d_0.bmp", WIDTH, HEIGHT);
 
+    char Path[200];
+    strcpy(Path, Imagepath);
     GUI_ReadBmp(Path, 0, 0);
 
     //you can draw your character and pattern on the image, for color definition of all BitsPerPixel, you can refer to GUI_Paint.h, 

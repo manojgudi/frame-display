@@ -54,14 +54,26 @@ char * print_map(const struct _u_map * map) {
  
 
 void update_screen(){
+    char *EPD_BINARY_PATH = getenv("EPD_BINARY_PATH");
+    char epd_executable[100], image_path[100];
+    //char *image_path = "";
+
+    strcpy(epd_executable, EPD_BINARY_PATH);
+    strcpy(image_path, EPD_BINARY_PATH);
+    
+    strcat(epd_executable, "/epd");
+    strcat(image_path, "/pic/800x600_3.bmp");
     pid_t pid; 
     pid = fork();
+    
+    y_log_message(Y_LOG_LEVEL_DEBUG, "Executing %s with pic %s", epd_executable, image_path);
     // Child
     if (pid == 0){
         // Execute 
-        char *args[] = {"/usr/bin/touch", "blank_file", NULL};
-        int status_code = execvp("/usr/bin/touch", args);
+        char *args[] = {epd_executable, "-1.5", "3", image_path, NULL};
+        int status_code = execv(epd_executable, args);
         y_log_message(Y_LOG_LEVEL_DEBUG, "Executed Fork from child with status code %d", status_code );
+	exit(-1);
     } else if (pid == -1){
        y_log_message(Y_LOG_LEVEL_DEBUG, "Issue creating fork");
     } else {
@@ -94,7 +106,6 @@ static int callback_upload_file (const struct _u_request * request, struct _u_re
   size_t file_size = u_map_get_length(request->map_post_body, param);
 
   y_log_message(Y_LOG_LEVEL_DEBUG, "FILE DATA %s", file_data);
-
   FILE *write_ptr; 
   write_ptr = fopen("./static/test.bin", "wb");
 
