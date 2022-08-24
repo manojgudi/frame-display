@@ -3,7 +3,7 @@
 bin/*
 
 # Ignore compiled files
-src/webservice
+webservice/webservice
 
 # Prerequisites
 *.d
