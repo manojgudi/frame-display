@@ -19,6 +19,11 @@
 #define STATIC_PREFIX "static"
 #define FILE_PREFIX "/upload"
 
+typedef struct DirectoryPathStruct{
+    char *EPD_BINARY_PATH;
+    char *WEBSERVICE_PATH;
+} DirectoryPathStruct;
+
 /**
  * decode a u_map into a string
  */
@@ -53,16 +58,16 @@ char * print_map(const struct _u_map * map) {
 }
  
 
-void update_screen(){
-    char *EPD_BINARY_PATH = getenv("EPD_BINARY_PATH");
+void update_screen(char* WEBSERVICE_PATH, char* EPD_BINARY_PATH){
+;
     char epd_executable[100], image_path[100];
     //char *image_path = "";
 
     strcpy(epd_executable, EPD_BINARY_PATH);
-    strcpy(image_path, EPD_BINARY_PATH);
+    strcpy(image_path, WEBSERVICE_PATH);
     
     strcat(epd_executable, "/epd");
-    strcat(image_path, "/pic/800x600_3.bmp");
+    strcat(image_path, "/static/cropped.bmp");
     pid_t pid; 
     pid = fork();
     
@@ -92,6 +97,9 @@ static int callback_upload_file (const struct _u_request * request, struct _u_re
 
   char * string_body = msprintf("Upload file\n\n  method is %s\n  url is %s\n\n  parameters from the url are \n%s\n\n  cookies are \n%s\n\n  headers are \n%s\n\n  post parameters are \n%s\n\n",
                                   request->http_verb, request->http_url, url_params, cookies, headers, post_params);
+
+  DirectoryPathStruct *directory_path = user_data;
+
   y_log_message(Y_LOG_LEVEL_DEBUG, "Post parameters:\n%s", post_params);
   y_log_message(Y_LOG_LEVEL_DEBUG, "URL parameters:\n%s", url_params);
   o_free(url_params);
@@ -106,13 +114,19 @@ static int callback_upload_file (const struct _u_request * request, struct _u_re
   size_t file_size = u_map_get_length(request->map_post_body, param);
 
   y_log_message(Y_LOG_LEVEL_DEBUG, "FILE DATA %s", file_data);
-  FILE *write_ptr; 
-  write_ptr = fopen("./static/test.bin", "wb");
+  FILE *write_ptr;
+  char image_path[100];
+
+  strcpy(image_path, directory_path->WEBSERVICE_PATH);
+  strcat(image_path, "/static/cropped.bmp");
+  y_log_message(Y_LOG_LEVEL_DEBUG, "Cropped image save %s", image_path);
+  write_ptr = fopen(image_path, "wb");
 
   fwrite(file_data, file_size, 1, write_ptr);
   fclose(write_ptr);
 
-  update_screen();
+  update_screen(directory_path->WEBSERVICE_PATH,
+		  directory_path->EPD_BINARY_PATH);
 
   return U_CALLBACK_CONTINUE;
 }
@@ -125,6 +139,13 @@ static int callback_upload_file (const struct _u_request * request, struct _u_re
 int main(int argc, char **argv) {
     struct _u_instance instance;
     struct _u_compressed_inmemory_website_config file_config;
+    DirectoryPathStruct *directory_path = &(DirectoryPathStruct){
+        .WEBSERVICE_PATH = NULL,
+	.EPD_BINARY_PATH = NULL
+    };
+
+    directory_path->EPD_BINARY_PATH = getenv("EPD_BINARY_PATH");
+    directory_path->WEBSERVICE_PATH = getenv("WEBSERVICE_PATH");
 
     y_init_logs("Webservice", Y_LOG_MODE_CONSOLE, Y_LOG_LEVEL_DEBUG, NULL, "Starting webservice")    ;
 
@@ -155,18 +176,22 @@ int main(int argc, char **argv) {
       return(1);
     }
 
+     y_log_message(Y_LOG_LEVEL_DEBUG, "BINARY PATH %s & WEBSERVICE PATH %s", directory_path->EPD_BINARY_PATH, directory_path->WEBSERVICE_PATH);
+
+
     // Upload related configurations, max file size 1 MB
-    instance.max_post_param_size = 1024*1024;
+    instance.max_post_param_size = 5*1024*1024; //5MB Limit
     instance.check_utf8 = 0;
 
-    ulfius_add_endpoint_by_val(&instance, "POST", STATIC_PREFIX, "/upload", 1, &callback_upload_file, NULL);
+    ulfius_add_endpoint_by_val(&instance, "POST", STATIC_PREFIX, "/upload", 1, &callback_upload_file, (void *) directory_path);
 
     // Start the framework
     if (ulfius_start_framework(&instance) == U_OK) {
     printf("Start framework on port %d\n", instance.port);
 
     // Wait for the user to press <enter> on the console to quit the application
-    getchar();
+    //getchar();
+    while(1){}
     } else {
     fprintf(stderr, "Error starting framework\n");
     }

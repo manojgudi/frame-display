@@ -1,5 +1,5 @@
 import requests
-files = {'upload_file': open('file.jpg','rb')}
+files = {'upload_file': open('/home/billburr/eink/frame-display/webservice/static/cropped.bmp','rb')}
 values = {'DB': 'photcat', 'OUT': 'csv', 'SHORT': 'short'}
 
 url = "http://localhost:8080/static/upload"

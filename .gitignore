@@ -4,6 +4,8 @@ bin/*
 
 # Ignore compiled files
 webservice/webservice
+webservice/static/
+display/epd
 
 # Prerequisites
 *.d
